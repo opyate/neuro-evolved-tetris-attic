@@ -1,0 +1,69 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    command: uvicorn app.server:app --host 0.0.0.0 --reload
+    volumes:
+      - ./app:/usr/src/app/app
+      - ./static:/usr/src/app/static
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      watchmedo auto-restart
+      --directory=./app
+      --patterns="*.py"
+      --recursive
+      -- celery -A app.worker.celery worker --loglevel=info --logfile=logs/celery.log
+    volumes:
+      - ./app:/usr/src/app/app
+      - ./logs:/usr/src/app/logs
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - C_FORCE_ROOT=true
+    depends_on:
+      - web
+      - redis
+
+  redis:
+    image: redis:7.4.0
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    volumes:
+    - ./redis:/usr/local/etc/redis
+    ports:
+      - 6379:6379
+
+
+  # dashboard:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: celery --broker=redis://redis:6379/0 flower --port=5555 --conf=/var/flower/celery.py
+  #   ports:
+  #     - 5555:5555
+  #   volumes:
+  #     - ./conf:/var/flower
+  #   environment:
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
+  #     - CELERY_RESULT_BACKEND=redis://redis:6379/0
+  #     - CELERY_ACCEPT_CONTENT=pickle
+  #     - CELERY_TASK_SERIALIZER=pickle
+  #     - CELERY_RESULT_SERIALIZER=pickle
+  #     - CELERY_EVENT_SERIALIZER=pickle
+  #   depends_on:
+  #     - web
+  #     - redis
+  #     - worker

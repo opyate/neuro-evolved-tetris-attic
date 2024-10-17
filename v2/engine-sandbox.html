@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tetris</title>
+    <style>
+        #game-container {
+            display: flex;
+        }
+
+        #game-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            border: 1px solid black;
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid lightgray;
+            box-sizing: border-box;
+        }
+
+        /* Tetris piece colors */
+        .occupied.I {
+            background-color: cyan;
+        }
+
+        .occupied.J {
+            background-color: blue;
+        }
+
+        .occupied.L {
+            background-color: orange;
+        }
+
+        .occupied.O {
+            background-color: yellow;
+        }
+
+        .occupied.S {
+            background-color: green;
+        }
+
+        .occupied.T {
+            background-color: purple;
+        }
+
+        .occupied.Z {
+            background-color: red;
+        }
+
+        #controls {
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <div id="game-grid"></div>
+        <div id="controls">
+            <div class="button-row">
+                <button id="rotate-left-button">&#x21BA;</button>
+                <button id="up-button" title="Instant Drop">&#x2B06;</button>
+                <button id="rotate-right-button">&#x21BB;</button>
+            </div>
+            <div class="button-row">
+                <button id="left-button">&#x2B05;</button>
+                <button id="down-button" title="Soft Drop">&#x2B07;</button>
+                <button id="right-button">&#x27A1;</button>
+            </div>
+            <button id="tick-button">Tick</button>
+        </div>
+    </div>
+
+    <script src="tetris-engine.js"></script>
+    <script>
+        const engine = new TetrisEngine(10, 10); // 10x10 board
+
+        const gameGrid = document.getElementById('game-grid');
+
+        // Function to render the grid (modified to include piece colors)
+        function renderGrid() {
+            gameGrid.innerHTML = '';
+
+            for (let row = 0; row < engine.height; row++) {
+                for (let col = 0; col < engine.width; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+
+                    let cellValue = engine.grid[row][col];
+                    if (cellValue === 1) {
+                        cellValue = engine.currentPiece.type;
+                    }
+                    if (cellValue !== 0) {
+                        cell.classList.add('occupied', cellValue); // Add color class based on piece type
+                    }
+
+                    gameGrid.appendChild(cell);
+                }
+            }
+
+            console.log("Score: " + engine.score);
+            console.table(engine.grid);
+        }
+
+        // Event listeners for the buttons
+        // tick
+        document.getElementById('tick-button').addEventListener('click', () => {
+            engine.tick();
+            renderGrid();
+        });
+
+        // up
+        document.getElementById('up-button').addEventListener('click', () => {
+            engine.movePiece("up");
+            renderGrid();
+        });
+
+        // down
+        document.getElementById('down-button').addEventListener('click', () => {
+            engine.movePiece("down");
+            renderGrid();
+        });
+
+        // left
+        document.getElementById('left-button').addEventListener('click', () => {
+            engine.movePiece("left");
+            renderGrid();
+        });
+
+        // right
+        document.getElementById('right-button').addEventListener('click', () => {
+            engine.movePiece("right");
+            renderGrid();
+        });
+
+        // counter-clockwise rotation
+        document.getElementById('rotate-left-button').addEventListener('click', () => {
+            engine.movePiece("rotate_ccw");
+            renderGrid();
+        });
+
+        // clockwise rotation
+        document.getElementById('rotate-right-button').addEventListener('click', () => {
+            engine.movePiece("rotate_cw");
+            renderGrid();
+        });
+
+        // Initial render
+        renderGrid();
+    </script>
+</body>
+
+</html>

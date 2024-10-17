@@ -1,0 +1,43 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    command: uvicorn app.server:app --host 0.0.0.0 --reload
+    volumes:
+      - ./app:/usr/src/app/app
+      - .env:/usr/src/app/.env
+      - ./static:/usr/src/app/static
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    deploy:
+      replicas: $NUMBER_OF_WORKERS
+    command: python app/worker.py
+    volumes:
+      - ./app:/usr/src/app/app
+      - .env:/usr/src/app/.env
+      - ./logs:/usr/src/app/logs
+    environment:
+      - PYTHONPATH=/usr/src/app
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.4.0
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+    volumes:
+    - ./redis:/usr/local/etc/redis
+    ports:
+      - 6379:6379

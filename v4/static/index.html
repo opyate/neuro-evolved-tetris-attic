@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuro Evolved Tetris</title>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+</head>
+
+<body>
+    <script src="static/libraries/p5.min.js"></script>
+    <script src="static/libraries/p5.sound.min.js"></script>
+    <script src="static/libraries/ml5.min.js"></script>
+    <script src="static/util.js"></script>
+    <script>
+        const BLOCK_SIZE_PIXELS = 5;
+        const NUMBER_OF_GAMES = parseInt(new URLSearchParams(window.location.search).get('n')) || 16;
+        const WIDTH = 10;
+        const HEIGHT = 10;
+        const gridSize = calculateGridSize(NUMBER_OF_GAMES, window.innerWidth, window.innerHeight);
+        const COLS = gridSize.gridWidth;
+        const ROWS = gridSize.gridHeight;
+    </script>
+    <script src="static/index.js"></script>
+</body>
+
+</html>
